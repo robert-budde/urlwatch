@@ -72,9 +72,10 @@ class Mailer(object):
 
 
 class SMTPMailer(Mailer):
-    def __init__(self, smtp_user, smtp_server, smtp_port, tls, auth):
-        self.smtp_server = smtp_server
+    def __init__(self, smtp_user, smtp_passwd, smtp_server, smtp_port, tls, auth):
         self.smtp_user = smtp_user
+        self.smtp_passwd = smtp_passwd
+        self.smtp_server = smtp_server
         self.smtp_port = smtp_port
         self.tls = tls
         self.auth = auth
@@ -86,11 +87,12 @@ class SMTPMailer(Mailer):
         if self.tls:
             s.starttls()
 
-        if self.auth and keyring is not None:
-            passwd = keyring.get_password(self.smtp_server, self.smtp_user)
-            if passwd is None:
-                raise ValueError('No password available in keyring for {}, {}'.format(self.smtp_server, self.smtp_user))
-            s.login(self.smtp_user, passwd)
+        if (self.auth and keyring is not None) or self.smtp_passwd is not None:
+            if self.auth and keyring is not None:
+                self.smtp_passwd = keyring.get_password(self.smtp_server, self.smtp_user)
+                if self.smtp_passwd is None:
+                    raise ValueError('No password available in keyring for {}, {}'.format(self.smtp_server, self.smtp_user))
+            s.login(self.smtp_user, self.smtp_passwd)
 
         s.sendmail(msg['From'], [msg['To']], msg.as_string())
         s.quit()

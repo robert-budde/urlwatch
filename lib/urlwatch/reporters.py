@@ -397,7 +397,7 @@ class EMailReporter(TextReporter):
             return
         if self.config['method'] == "smtp":
             smtp_user = self.config['smtp'].get('user', None) or self.config['from']
-            mailer = SMTPMailer(smtp_user, self.config['smtp']['host'], self.config['smtp']['port'],
+            mailer = SMTPMailer(smtp_user, self.config['smtp']['password'], self.config['smtp']['host'], self.config['smtp']['port'],
                                 self.config['smtp']['starttls'], self.config['smtp']['keyring'])
         elif self.config['method'] == "sendmail":
             mailer = SendmailMailer(self.config['sendmail']['path'])
